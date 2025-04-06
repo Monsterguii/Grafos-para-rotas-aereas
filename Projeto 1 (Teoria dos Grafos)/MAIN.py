@@ -1,6 +1,13 @@
 #Bruno Rabelo Torchio de Oliveira 	RA: 10239373
 #Guilherme Dias Ferreira Pereira  	RA: 10417684
 
+#Semana 1: Opções A e B sendo produzidas ao mesmo tempo da modelagem do grafo.
+#Semana 2: Opções G, H e I  produzidas e criação do grafo.txt. para leitura.
+#Semana 3: Opções C, D, E e F produzidas e criação da documentação e relatório.
+
+#Talvez seja necessário usar o comando pip install para instalar algumas bibliotecas importados no projeto.
+#Bibliotecas necessarias: networkx, matplotlib, chardet.
+
 from grafoMatriz import Grafo
 import chardet
 
