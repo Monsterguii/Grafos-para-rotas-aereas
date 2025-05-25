@@ -22,7 +22,13 @@ def exibir_menu():
     print("g) Mostrar conteúdo do arquivo")
     print("h) Mostrar grafo")
     print("i) Apresentar a conexidade do grafo e o reduzido")
-    print("j) Encerrar a aplicação")
+    print("j) Grau dos vértices")
+    print("k) Verificar se é euleriano")
+    print("l) Verificar se admite ciclo hamiltoniano usando o teorema de Dirac")
+    print("m) Aeroporto com maior emissão total de carbono")
+    print("n) Caminho de menor emissão entre dois aeroportos")
+    print("o) Solução encontrada")
+    print("p) Encerrar a aplicação")
 
 def main():
     Grafito = None
@@ -50,8 +56,10 @@ def main():
                         
                     num_arestas = int(file.readline().strip())
                     for _ in range(num_arestas):
-                        start, end = map(int, file.readline().split()[:2])
-                        Grafito.insereA(start, end)
+                        parts = file.readline().split()
+                        start, end = map(int, parts[:2])
+                        peso = float(parts[2]) if len(parts) > 2 else None
+                        Grafito.insereA(start, end, peso)
                         
             #Opção que atualiza o grafo.txt após mudanças
             #(NECESSARIO APOS TODA MUDANÇA AO GRAFO)
@@ -69,8 +77,11 @@ def main():
 
                             arestas = Grafito.get_arestas()
                             file.write(f"{len(arestas)}\n")
-                            for origem, destino in arestas:
-                                file.write(f"{origem} {destino}\n")
+                            for origem, destino, peso in Grafito.get_arestas():
+                                if peso is not None:
+                                    file.write(f"{origem} {destino} {peso}\n")
+                                else:
+                                    file.write(f"{origem} {destino}\n")
                     except Exception as e:
                         print(f"Erro ao salvar o grafo: {e}")
                 else:
@@ -155,12 +166,15 @@ def main():
                 num_arestas = int(lines[2 + num_vertices])
                 Arestas = []
                 for i in range (3 + num_vertices, 3 + num_vertices + num_arestas):
-                    arestinha = list(map(int, lines[i].split()))
-                    Arestas.append((arestinha[0], arestinha[1]))
+                    parts = lines[i].split()
+                    origem = int(parts[0])
+                    destino = int(parts[1])
+                    peso = float(parts[2]) if len(parts) > 2 else None
+                    Arestas.append((origem, destino, peso))
                     
                 print("Graph Type: ", tipo_grafo)
                 print("Vertices: ", vertices)
-                print("Arestas (Começo, Fim):")
+                print("Arestas (Começo, Fim, Peso):")
                 for Aresta in Arestas:
                     print(Aresta)
             case 'h':
@@ -178,6 +192,100 @@ def main():
                 else:
                     print("Nenhum grafo foi carregado ou criado.")
             case 'j':
+                print("\nGrau dos vértices (aeroportos):")
+                if Grafito is not None:
+                    for v in Grafito.vertices:
+                        grau = sum(1 for w in range(Grafito.n) if Grafito.adj[v][w] or Grafito.adj[w][v])
+                        print(f"Aeroporto {v} ({Grafito.vertices[v]}): grau {grau}")
+                else:
+                    print("Nenhum grafo carregado.")
+
+            case 'k':
+                print("\nVerificando se o grafo é euleriano...")
+                #Ciclo Euleriano: um caminho que passar por todas as arestas e retorna ao ponto de partida.()
+                #Percurso Euleriano: um caminho que passarpor todas as arestas e não necessariamente volta ao ponto de partida.
+                if Grafito is not None:
+                    graus = [sum(1 for w in range(Grafito.n) if Grafito.adj[v][w] or Grafito.adj[w][v]) for v in Grafito.vertices]
+                    graus_impares = sum(1 for g in graus if g % 2 == 1)
+                    if graus_impares == 2:
+                        print("O grafo possui um percurso euleriano (mas não é ciclo euleriano).")
+                    elif graus_impares == 0:
+                        print("O grafo é euleriano (possui ciclo euleriano).")
+                    else:
+                        print("O grafo NÃO possui percurso euleriano e nem ciclo euleriano.")
+                else:
+                    print("Nenhum grafo carregado.")
+
+            case 'l':
+                print("\nVerificando se admite ciclo hamiltoniano (heurística)...")
+                if Grafito is not None:
+                    # Heurística simples: se o grau de todos os vértices >= n/2, pode ser hamiltoniano (Dirac)
+                    n = len(Grafito.vertices)
+                    graus = [sum(1 for w in range(Grafito.n) if Grafito.adj[v][w] or Grafito.adj[w][v]) for v in Grafito.vertices]
+                    if all(g >= n // 2 for g in graus):
+                        print("Pode admitir ciclo hamiltoniano (Dirac).")
+                    else:
+                        print("Provavelmente NÃO admite ciclo hamiltoniano.")
+                else:
+                    print("Nenhum grafo carregado.")
+
+            case 'm':
+                print("\nAeroporto com maior emissão total de carbono(lembrando que os valores estão em kg):")
+                if Grafito is not None:
+                    max_emissao = -1
+                    aeroporto = None
+                    for v in Grafito.vertices:
+                        total = sum(Grafito.pesos.get((v, w), 0) for w in range(Grafito.n)) + \
+                                sum(Grafito.pesos.get((w, v), 0) for w in range(Grafito.n))
+                        if total > max_emissao:
+                            max_emissao = total
+                            aeroporto = v
+                    print(f"Aeroporto {aeroporto} ({Grafito.vertices[aeroporto]}) - Emissão total: {max_emissao}")
+                else:
+                    print("Nenhum grafo carregado.")
+
+            case 'n':
+                print("\nCaminho de menor emissão entre dois aeroportos (Dijkstra):")
+                if Grafito is not None:
+                    origem = int(input("Índice do aeroporto de origem: "))
+                    destino = int(input("Índice do aeroporto de destino: "))
+                    caminho, custo = Grafito.dijkstra(origem, destino)
+                    if caminho is None or custo == float('inf'):
+                        print("Não existe caminho entre os aeroportos informados.")
+                    else:
+                        nomes = [Grafito.vertices[v] for v in caminho]
+                        print(f"Caminho: {' -> '.join(nomes)}")
+                        print(f"Emissão total de carbono: {custo}")
+                else:
+                    print("Nenhum grafo carregado.")
+
+            case 'o':
+                print("\nSoluções para Reduzir as Emissões de CO² em Rotas Aéreas Domésticas:")
+                print("1. **Substituição por meios de transporte Menos Poluentes:**")
+                print("   - Para rotas curtas, incentivar o uso de trens de alta velocidade, ônibus elétricos ou outros meios de transporte coletivo menos poluentes pode reduzir drasticamente as emissões.")
+                print("   - Exemplo: A rota Cuiabá-Água Boa, que emite mais de 11 toneladas de CO² por voo, poderia ser substituída por linhas de ônibus elétricos ou ferroviárias, reduzindo o impacto ambiental e o custo por passageiro.")
+                print()
+                print("2. **Otimização de Rotas e Operações:**")
+                print("   - Com estudos mais aprofundados, podemos achar meios de diminuir escalas e fazer viagens diretas, poupando muitas horas de voo e, consequentemente, reduzindo as emissões de CO².")
+                print("   - Implementar técnicas de gerenciamento de tráfego aéreo para minimizar esperas e trajetos circulares.")
+                print("   - Exemplo: Otimizar a rota São Paulo-Manaus para evitar escalas intermediárias e trajetos mais longos, reduzindo a emissão total de CO².")
+                print()
+                print("3. **Modernização da Frota Aérea:**")
+                print("   - Investir em aeronaves mais modernas, com motores mais eficientes e aerodinâmica aprimorada, pode reduzir o consumo de combustível e, consequentemente, as emissões.")
+                print("   - Exemplo: Substituir aviões antigos por modelos como o Airbus A320neo ou Boeing 737 MAX, que consomem menos combustível por quilômetro voado.")
+                print()
+                print("4. **Uso de Combustíveis Sustentáveis de Aviação (SAF):**")
+                print("   - Incentivar o uso de biocombustíveis e combustíveis sintéticos, que emitem menos CO² ao longo do ciclo de vida.")
+                print("   - Exemplo: Misturar SAF ao combustível convencional pode reduzir as emissões em até 80% em alguns casos.")
+                print()
+                print("5. **Compensação de Carbono:**")
+                print("   - Implementar programas de compensação, como o plantio de árvores ou investimentos em projetos de energia renovável, para neutralizar as emissões dos voos.")
+                print("   - Exemplo: Companhias aéreas podem oferecer aos passageiros a opção de compensar as emissões de suas viagens.")
+                print()
+                print()
+                print("**Resumo:**")
+                print("A redução das emissões de CO² no setor aéreo depende de uma combinação de tecnologia, políticas públicas, mudança de comportamento e inovação em infraestrutura. A escolha da solução ideal depende do perfil da rota, da infraestrutura disponível e do engajamento de todos os atores do setor.")
+            case 'p':
                 print("\nEncerrando a aplicação...")
                 break
             case _:

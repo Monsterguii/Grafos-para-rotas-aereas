@@ -5,15 +5,14 @@ import networkx as nx
 import matplotlib.pyplot as plt 
 
 class Grafo:
-    TAM_MAX_DEFAULT = 100 # qtde de vértices máxima default
-    # construtor da classe grafo
+    TAM_MAX_DEFAULT = 130 # qtde de vértices máxima default
     def __init__(self, n=TAM_MAX_DEFAULT):
-        self.n = n # número de vértices
-        self.m = 0 # número de arestas
+        self.n = n
+        self.m = 0
         self.visual = []
         self.vertices = {}
-        # matriz de adjacência
         self.adj = [[0 for i in range(n)] for j in range(n)]
+        self.pesos = {}  # Novo: dicionário para pesos das arestas
 
     def add_vertex(self, index, name):
         self.vertices[index] = name
@@ -35,19 +34,23 @@ class Grafo:
             print(f"Vértice {index} não encontrado.")
     # Insere uma aresta no Grafo tal que
     # v é adjacente a w
-    def insereA(self, v, w):
+    def insereA(self, v, w, peso=None):
         if self.adj[v][w] == 0:
             temp = [v, w]
             self.visual.append(temp)
             self.adj[v][w] = 1
-            self.m+=1 # atualiza qtd arestas
+            self.m += 1
+            if peso is not None:
+                self.pesos[(v, w)] = peso  # Novo: armazena o peso
     
     # remove uma aresta v->w do Grafo
     def removeA(self, v, w):
         # testa se temos a aresta
         if self.adj[v][w] == 1:
             self.adj[v][w] = 0
-            self.m-=1; # atualiza qtd arestas
+            self.m -= 1
+            if (v, w) in self.pesos:
+                del self.pesos[(v, w)]  # Novo: remove o peso
 
     #Usado para resgatar as arestas no grafo atual
     def get_arestas(self):
@@ -55,7 +58,8 @@ class Grafo:
         for i in range(self.n):
             for j in range(self.n):
                 if self.adj[i][j] == 1:
-                    arestas.append((i, j))
+                    peso = self.pesos.get((i, j))
+                    arestas.append((i, j, peso))  # Novo: retorna peso
         return arestas
     # Apresenta o Grafo contendo
     # número de vértices, arestas
@@ -116,3 +120,37 @@ class Grafo:
         G.add_edges_from(self.visual) 
         nx.draw_networkx(G) 
         plt.show()
+        
+    def dijkstra(self, origem, destino):
+        dist = {v: float('inf') for v in self.vertices}
+        anterior = {v: None for v in self.vertices}
+        visitado = {v: False for v in self.vertices}
+        dist[origem] = 0
+
+        while True:
+            # Seleciona o vértice não visitado com menor distância
+            u = None
+            menor_dist = float('inf')
+            for v in self.vertices:
+                if not visitado[v] and dist[v] < menor_dist:
+                    menor_dist = dist[v]
+                    u = v
+            if u is None or u == destino:
+                break
+            visitado[u] = True
+            for v in self.vertices:
+                if self.adj[u][v]:
+                    peso = self.pesos.get((u, v), 1)
+                    if dist[u] + peso < dist[v]:
+                        dist[v] = dist[u] + peso
+                        anterior[v] = u
+
+        # Reconstrói o caminho
+        caminho = []
+        atual = destino
+        if dist[atual] == float('inf'):
+            return None, float('inf')
+        while atual is not None:
+            caminho.insert(0, atual)
+            atual = anterior[atual]
+        return caminho, dist[destino]
