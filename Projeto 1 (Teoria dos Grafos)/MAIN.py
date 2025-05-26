@@ -267,7 +267,7 @@ def main():
                 print("\nSoluções para Reduzir as Emissões de CO² em Rotas Aéreas Domésticas:")
                 print("1. **Substituição por meios de transporte Menos Poluentes:**")
                 print("   - Para rotas curtas, incentivar o uso de trens de alta velocidade, ônibus elétricos ou outros meios de transporte coletivo menos poluentes pode reduzir drasticamente as emissões.")
-                print("   - Exemplo: A rota São Paulo-Guarulhos, que emite quase 10 toneladas toneladas de CO² por voo, poderia ser substituída por linhas de ônibus elétricos ou ferroviárias, reduzindo o impacto ambiental e o custo por passageiro.")
+                print("   - Exemplo: A rota São Paulo-Guarulhos, que emite quase 10 toneladas de CO² por voo, poderia ser substituída por linhas de ônibus elétricos ou ferroviárias, reduzindo o impacto ambiental e o custo por passageiro.")
                 print()
                 print("2. **Otimização de Rotas e Operações:**")
                 print("   - Com estudos mais aprofundados, podemos achar meios de diminuir escalas e fazer viagens diretas, poupando muitas horas de voo e, consequentemente, reduzindo as emissões de CO².")

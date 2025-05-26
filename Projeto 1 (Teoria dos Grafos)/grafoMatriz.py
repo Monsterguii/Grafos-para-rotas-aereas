@@ -12,7 +12,7 @@ class Grafo:
         self.visual = []
         self.vertices = {}
         self.adj = [[0 for i in range(n)] for j in range(n)]
-        self.pesos = {}  # Novo: dicionário para pesos das arestas
+        self.pesos = {} 
 
     def add_vertex(self, index, name):
         self.vertices[index] = name
